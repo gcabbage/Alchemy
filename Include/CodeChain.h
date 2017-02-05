@@ -482,6 +482,7 @@ class CCLambda : public ICCAtom
 
 		virtual ICCItem *Clone (CCodeChain *pCC) override;
 		virtual ICCItem *Execute (CEvalContext *pCtx, ICCItem *pArgs) override;
+		virtual CString GetHelp (void) override { return m_sDesc; }
 		virtual CString GetStringValue (void) override { return LITERAL("[lambda expression]"); }
 		virtual ValueTypes GetValueType (void) override { return Function; }
 		virtual bool IsIdentifier (void) override { return false; }
@@ -499,6 +500,7 @@ class CCLambda : public ICCAtom
 		ICCItem *m_pArgList;
 		ICCItem *m_pCode;
 		ICCItem *m_pLocalSymbols;
+		CString m_sDesc;
 	};
 
 //	A list is a list of items

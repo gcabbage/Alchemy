@@ -9,7 +9,8 @@ static CObjectClass<CCLambda>g_Class(OBJID_CCLAMBDA, NULL);
 CCLambda::CCLambda (void) : ICCAtom(&g_Class),
 		m_pArgList(NULL),
 		m_pCode(NULL),
-		m_pLocalSymbols(NULL)
+		m_pLocalSymbols(NULL),
+		m_sDesc(NULL_STR)
 
 //	CCLambda constructor
 
@@ -49,6 +50,8 @@ ICCItem *CCLambda::Clone (CCodeChain *pCC)
 	else
 		pClone->m_pLocalSymbols = NULL;
 
+	pClone->m_sDesc = m_sDesc;
+
 	return pClone;
 	}
 
@@ -65,37 +68,40 @@ ICCItem *CCLambda::CreateFromList (CCodeChain *pCC, ICCItem *pList, bool bArgsOn
 	{
 	ICCItem *pArgs;
 	ICCItem *pBody;
+	int iArg = 0;
 
 	//	The first element must be the symbol lambda
 
-	if (bArgsOnly)
+	if (!bArgsOnly)
 		{
-		pArgs = pList->GetElement(0);
-		pBody = pList->GetElement(1);
-		}
-	else
-		{
-		pArgs = pList->GetElement(0);
+		pArgs = pList->GetElement(iArg++);
 		if (pArgs == NULL || !pArgs->IsLambdaSymbol())
 			return pCC->CreateError(LITERAL("Lambda symbol expected"), pArgs);
-
-		pArgs = pList->GetElement(1);
-		pBody = pList->GetElement(2);
 		}
 
 	//	The next item must be a list of arguments
+
+	pArgs = pList->GetElement(iArg++);
 
 	if (pArgs == NULL || !pArgs->IsList())
 		return pCC->CreateError(LITERAL("Argument list expected"), pArgs);
 
 	m_pArgList = pArgs->Reference();
 
+	//	Optional docstring argument
+
+	if (pList->GetCount() > iArg+1)
+		m_sDesc = pList->GetElement(iArg++)->GetStringValue();
+
 	//	The next item must exist
+
+	pBody = pList->GetElement(iArg++);
 
 	if (pBody == NULL)
 		{
 		m_pArgList->Discard(pCC);
 		m_pArgList = NULL;
+		m_sDesc = NULL_STR;
 		return pCC->CreateError(LITERAL("Code expected"), pList);
 		}
 
@@ -310,7 +316,7 @@ CString CCLambda::Print (CCodeChain *pCC, DWORD dwFlags)
 	//	Add code
 
 	sString.Append(m_pCode->Print(pCC, dwFlags));
-	
+
 	//	Done
 
 	sString.Append(CONSTLIT(")"));
@@ -327,6 +333,7 @@ void CCLambda::Reset (void)
 	m_pArgList = NULL;
 	m_pCode = NULL;
 	m_pLocalSymbols = NULL;
+	m_sDesc = NULL_STR;
 	}
 
 void CCLambda::SetLocalSymbols (CCodeChain *pCC, ICCItem *pSymbols)

@@ -1417,7 +1417,7 @@ ICCItem *fnHelp (CEvalContext *pCtx, ICCItem *pArgs, DWORD dwData)
 			{
 			ICCItem *pItem = pGlobals->GetElement(i);
 
-			if (pItem->IsPrimitive() && strStartsWith(pGlobals->GetKey(i), sPartial))
+			if (pItem->IsFunction() && strStartsWith(pGlobals->GetKey(i), sPartial))
 				{
 				CString sHelp = pItem->GetHelp();
 
